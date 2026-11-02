@@ -4,95 +4,198 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1020">
 <title>ARGON — Private Network</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
- --bg:#f5f4ef;--panel:#fffefa;--line:#e8e5dc;
- --green:#315b46;--green2:#e6eee6;
- --ink:#202a23;--muted:#898e84;--red:#a84444;
+ --bg:#090e1b;
+ --panel:#111a2c;
+ --panel2:#172238;
+ --line:#25334b;
+ --accent:#9b8cff;
+ --accent2:#6d5ce7;
+ --ink:#edf0ff;
+ --muted:#8995ae;
+ --red:#ff777f;
+ --green:#60d6a0;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif}
+body{
+ margin:0;background:var(--bg);color:var(--ink);
+ font-family:Inter,Arial,sans-serif;
+ min-height:100vh;
+ background-image:radial-gradient(ellipse at 15% 0%,#25204c 0%,transparent 40%);
+}
 button,input{font:inherit}
-button{border:0;border-radius:9px;padding:12px 15px;cursor:pointer;font-weight:700}
+button{
+ border:0;border-radius:11px;padding:12px 16px;
+ cursor:pointer;font-weight:700;transition:.2s;
+}
+button:disabled{opacity:.4;cursor:not-allowed}
 header{
- height:72px;padding:0 5%;display:flex;align-items:center;
- justify-content:space-between;background:var(--panel);
- border-bottom:1px solid var(--line)
+ height:76px;padding:0 5%;
+ display:flex;align-items:center;justify-content:space-between;
+ background:#0b1221dd;border-bottom:1px solid var(--line);
+ backdrop-filter:blur(15px);
+ position:sticky;top:0;z-index:5;
 }
-.logo{font-size:24px;font-weight:900;letter-spacing:4px;color:var(--green)}
-.logo span{color:#9aaa83}
-.tag{font-size:10px;letter-spacing:2px;color:var(--muted)}
-main{max-width:1250px;margin:30px auto;padding:0 16px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px}
-.auth{max-width:430px;margin:65px auto}
-h1{font:500 35px Georgia,serif;margin:12px 0}
-h2{font:500 23px Georgia,serif;margin:9px 0}
-p{line-height:1.5}
+.logo{
+ font-size:25px;font-weight:900;letter-spacing:5px;
+ color:white;
+}
+.logo span{color:var(--accent)}
+.tag{
+ font-size:10px;letter-spacing:2.5px;color:var(--muted);
+}
+main{max-width:1300px;margin:35px auto;padding:0 18px}
+.card{
+ background:linear-gradient(145deg,#141e32,#101827);
+ border:1px solid var(--line);border-radius:19px;
+ padding:23px;box-shadow:0 15px 50px #0003;
+}
+.auth{max-width:440px;margin:65px auto}
+.eyebrow{
+ font-size:10px;letter-spacing:2.5px;
+ color:var(--accent);font-weight:800;
+}
+h1{
+ font-size:37px;letter-spacing:-1.5px;
+ margin:15px 0 10px;
+}
+h2{font-size:23px;margin:10px 0}
+p{line-height:1.55}
 .muted{font-size:13px;color:var(--muted)}
-.eyebrow{font-size:10px;letter-spacing:2px;color:#66836c;font-weight:800}
 input{
- width:100%;padding:14px;margin:7px 0;background:#faf9f5;
- border:1px solid var(--line);border-radius:9px;color:var(--ink);outline:none
+ width:100%;padding:15px;margin:8px 0;
+ background:#0b1322;border:1px solid var(--line);
+ border-radius:11px;color:white;outline:none;
+ transition:.2s;
 }
-input:focus{border-color:var(--green)}
-.primary{background:var(--green);color:white}
-.secondary{background:#eeeee7;color:#35483a}
-.good{background:#dcebe0;color:#315b46}
-.bad{background:#f5e2df;color:var(--red)}
-.full{width:100%;margin-top:9px}
-.tabs{display:flex;gap:8px;margin:20px 0}
+input:focus{
+ border-color:var(--accent);
+ box-shadow:0 0 0 3px #9b8cff18;
+}
+input::placeholder{color:#68758d}
+.primary{
+ background:linear-gradient(110deg,var(--accent2),#a18cff);
+ color:white;box-shadow:0 6px 20px #8068ff30;
+}
+.primary:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.secondary{background:#202d43;color:#dce4f7}
+.secondary:hover{background:#2b3b56}
+.good{background:#153c35;color:var(--green)}
+.bad{background:#42232c;color:var(--red)}
+.full{width:100%;margin-top:10px}
+.tabs{display:flex;gap:9px;margin:25px 0 18px}
 .tabs button{flex:1}
 .hidden{display:none!important}
-.status{font-size:13px;color:var(--green);min-height:20px;margin-top:12px}
+.status{font-size:13px;color:var(--accent);min-height:20px;margin-top:14px}
 #workspace{display:none}
-.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px}
-.sidebar{min-height:620px;display:flex;flex-direction:column}
-.sidehead{display:flex;align-items:center;justify-content:space-between}
-.members{overflow:auto;flex:1}
+.layout{
+ display:grid;grid-template-columns:310px minmax(0,1fr);
+ gap:18px;
+}
+.sidebar{
+ min-height:660px;display:flex;flex-direction:column;
+}
+.sidehead{
+ display:flex;align-items:center;justify-content:space-between;
+ padding-bottom:15px;border-bottom:1px solid var(--line);
+}
+.members{overflow:auto;flex:1;padding-top:12px}
 .person{
- display:flex;align-items:center;gap:12px;width:100%;
+ display:flex;align-items:center;gap:13px;width:100%;
  text-align:left;background:transparent;color:var(--ink);
- margin:4px 0;padding:12px;border-radius:11px
+ margin:5px 0;padding:13px;border-radius:12px;
+ border:1px solid transparent;
 }
-.person:hover,.person.active{background:var(--green2)}
+.person:hover,.person.active{
+ background:#242746;border-color:#50468a;
+}
 .avatar{
- width:42px;height:42px;border-radius:50%;display:grid;
- place-items:center;background:#dce9dd;color:var(--green);
- font-weight:800;flex-shrink:0
+ width:44px;height:44px;border-radius:14px;
+ display:grid;place-items:center;
+ background:linear-gradient(145deg,#7668d9,#ad91ff);
+ color:white;font-weight:900;flex-shrink:0;
 }
-.person small{display:block;color:var(--muted);font-size:11px;margin-top:4px}
-.chat{min-height:620px;display:flex;flex-direction:column}
-.chathead{border-bottom:1px solid var(--line);padding-bottom:15px}
-.messages{flex:1;min-height:350px;max-height:470px;overflow:auto;padding:15px 4px}
+.person small{
+ display:block;color:var(--muted);
+ font-size:11px;margin-top:5px;font-weight:400;
+}
+.chat{
+ min-height:660px;display:flex;flex-direction:column;
+}
+.chathead{
+ border-bottom:1px solid var(--line);
+ padding-bottom:18px;
+}
+.chathead h2{font-size:25px}
+.messages{
+ flex:1;min-height:350px;max-height:490px;
+ overflow:auto;padding:18px 5px;
+}
 .bubble{
- max-width:78%;width:fit-content;padding:11px 15px;margin:9px 0;
- background:#eeeee7;border-radius:5px 14px 14px 14px;overflow-wrap:anywhere
+ max-width:78%;width:fit-content;
+ padding:12px 16px;margin:11px 0;
+ background:#202d43;border:1px solid #30415d;
+ border-radius:5px 16px 16px 16px;
+ overflow-wrap:anywhere;
 }
-.bubble.mine{margin-left:auto;background:var(--green);color:white;border-radius:14px 5px 14px 14px}
-.bubble time{display:block;font-size:10px;margin-top:6px;opacity:.7}
-.composer{display:flex;gap:9px;border-top:1px solid var(--line);padding-top:12px}
+.bubble.mine{
+ margin-left:auto;
+ background:linear-gradient(120deg,#6555c8,#8272e8);
+ border:0;color:white;
+ border-radius:16px 5px 16px 16px;
+}
+.bubble time{
+ display:block;font-size:10px;margin-top:7px;opacity:.65;
+}
+.composer{
+ display:flex;gap:10px;
+ border-top:1px solid var(--line);padding-top:15px;
+}
 .composer input{margin:0;min-width:0}
-.request{padding:14px;margin:9px 0;background:#f6f5ef;border:1px solid var(--line);border-radius:11px}
-.actions{display:flex;gap:8px;margin-top:10px}
+.composer button{min-width:90px}
+.request{
+ padding:15px;margin:10px 0;
+ background:#19253a;border:1px solid var(--line);
+ border-radius:13px;
+}
+.actions{display:flex;gap:9px;margin-top:12px}
 .actions button{flex:1}
-.admin{margin-bottom:16px}
-.empty{text-align:center;color:var(--muted);margin:auto;padding:25px}
-@media(max-width:700px){
- header{padding:0 15px}.tag{display:none}
- main{margin:14px auto;padding:0 9px}
+.admin{margin-bottom:18px}
+.empty{
+ text-align:center;color:var(--muted);
+ margin:auto;padding:35px 15px;
+}
+.empty h2{color:var(--ink)}
+.online-dot{
+ width:8px;height:8px;border-radius:50%;
+ background:var(--green);display:inline-block;
+ margin-right:6px;
+}
+.brandline{
+ height:1px;background:linear-gradient(90deg,var(--accent),transparent);
+ margin:20px 0;
+}
+@media(max-width:750px){
+ header{padding:0 17px;height:68px}
+ .tag{display:none}
+ main{margin:18px auto;padding:0 10px}
  .layout{grid-template-columns:1fr}
- .sidebar{min-height:220px;max-height:280px}
- .chat{min-height:520px}
+ .sidebar{min-height:230px;max-height:285px}
+ .chat{min-height:550px}
  .messages{min-height:300px}
- .card{padding:15px}
+ .card{padding:16px}
  .auth{margin:35px auto}
- h1{font-size:30px}
+ h1{font-size:31px}
+ .bubble{max-width:88%}
 }
 </style>
 </head>
 <body>
+
 <header>
  <div class="logo">✦ ARGON<span>.</span></div>
  <div class="tag">PRIVATE COMMUNICATION NETWORK</div>
@@ -100,18 +203,22 @@ input:focus{border-color:var(--green)}
 
 <main>
 <section id="auth" class="card auth">
- <div class="eyebrow">A PRIVATE MEMBERS NETWORK</div>
- <h1>Welcome to Argon.</h1>
+ <div class="eyebrow">✦ A PRIVATE MEMBERS NETWORK</div>
+ <h1>Welcome back.</h1>
  <p class="muted">Your conversations. Your people. Your space.</p>
+ <div class="brandline"></div>
+
  <div class="tabs">
   <button id="loginTab" class="primary" onclick="switchTab('login')">Login</button>
   <button id="registerTab" class="secondary" onclick="switchTab('register')">Register</button>
  </div>
+
  <div id="loginForm">
   <input id="loginEmail" type="email" placeholder="Email address">
   <input id="loginPassword" type="password" placeholder="Password">
   <button class="primary full" onclick="login()">Enter Argon →</button>
  </div>
+
  <div id="registerForm" class="hidden">
   <input id="regName" placeholder="Display name">
   <input id="regEmail" type="email" placeholder="Email address">
@@ -138,7 +245,7 @@ input:focus{border-color:var(--green)}
 
 <section id="workspace">
  <section id="adminPanel" class="card admin hidden">
-  <div class="eyebrow">ADMIN CONTROL CENTRE</div>
+  <div class="eyebrow">✦ ADMIN CONTROL CENTRE</div>
   <h2>Membership requests</h2>
   <p class="muted">Review and manage access to Argon.</p>
   <div id="requests">Loading requests...</div>
@@ -148,11 +255,15 @@ input:focus{border-color:var(--green)}
  <div class="layout">
   <aside class="card sidebar">
    <div class="sidehead">
-    <div><div class="eyebrow">YOUR NETWORK</div><h2>Messages</h2></div>
+    <div>
+     <div class="eyebrow">YOUR NETWORK</div>
+     <h2>Messages</h2>
+     <p class="muted"><span class="online-dot"></span>Private member space</p>
+    </div>
     <button class="secondary" onclick="loadUsers()">↻</button>
    </div>
    <div id="users" class="members">Loading members...</div>
-   <button class="secondary full" onclick="logout()">Sign out</button>
+   <button class="secondary full" onclick="logout()">Sign out ↗</button>
   </aside>
 
   <section class="card chat">
@@ -161,9 +272,14 @@ input:focus{border-color:var(--green)}
     <h2 id="chatTitle">Select a conversation</h2>
     <p id="chatSubtitle" class="muted">Choose a member to start chatting.</p>
    </div>
+
    <div id="messages" class="messages">
-    <div class="empty"><h2>Your conversations</h2><p class="muted">Select a member to begin.</p></div>
+    <div class="empty">
+     <h2>Your conversations</h2>
+     <p class="muted">Select a member to begin.</p>
+    </div>
    </div>
+
    <div class="composer">
     <input id="messageInput" placeholder="Write a message..." disabled>
     <button id="sendBtn" class="primary" disabled onclick="sendMessage()">Send ↑</button>
@@ -334,7 +450,7 @@ async function loadUsers(){
   label.textContent=person.display_name||"Member";
 
   const small=document.createElement("small");
-  small.textContent="Argon member";
+  small.textContent="ARGON MEMBER";
   label.appendChild(small);
 
   b.append(avatar,label);
