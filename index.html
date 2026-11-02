@@ -1,0 +1,306 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Argon Chat</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b1020;color:#fff;font-family:Arial,sans-serif}
+header{padding:20px;background:#151e32;font-size:23px;font-weight:bold;color:#61d5ff}
+main{max-width:850px;margin:25px auto;padding:15px}
+.panel{background:#151e32;padding:22px;border-radius:15px;margin-bottom:15px}
+input,button{width:100%;padding:14px;margin:7px 0;border:0;border-radius:9px;font-size:15px}
+input{background:#253149;color:white}
+button{background:#168bd0;color:white;font-weight:bold;cursor:pointer}
+.secondary{background:#34435e}
+#app{display:none}
+#chatArea{display:none}
+#users{display:flex;flex-wrap:wrap;gap:8px}
+.user{width:auto;background:#293b56}
+#messages{height:350px;overflow:auto;background:#0b1020;padding:12px;border-radius:10px}
+.msg{background:#253d59;padding:10px;border-radius:10px;margin:8px 0;max-width:85%;overflow-wrap:anywhere}
+.mine{background:#126da3;margin-left:auto}
+small{color:#a8b5ca}
+</style>
+</head>
+<body>
+
+<header>✦ ARGON CHAT</header>
+
+<main>
+<div id="auth" class="panel">
+<h2>Welcome to Argon Chat</h2>
+<p>Private messaging. Approved members only.</p>
+
+<div id="register">
+<h3>Create account</h3>
+<input id="name" placeholder="Your display name">
+<input id="email" type="email" placeholder="Email address">
+<input id="password" type="password" placeholder="Password (minimum 6 characters)">
+<button onclick="register()">Create account</button>
+</div>
+
+<hr>
+<h3>Already a member? Login</h3>
+<input id="loginEmail" type="email" placeholder="Email address">
+<input id="loginPassword" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+<p id="status"></p>
+</div>
+
+<div id="pending" class="panel" style="display:none">
+<h2>Approval Pending ⏳</h2>
+<p>Your account is registered. The administrator must approve your account before you can chat.</p>
+<button onclick="checkApproval()">Check Status Again</button>
+<button class="secondary" onclick="logout()">Logout</button>
+</div>
+
+<div id="app">
+<div class="panel">
+<h3 id="welcome"></h3>
+<button class="secondary" onclick="logout()">Logout</button>
+</div>
+
+<div class="panel">
+<h3>Members</h3>
+<div id="users">Loading members...</div>
+</div>
+
+<div id="chatArea" class="panel">
+<h3 id="chatTitle">Conversation</h3>
+<div id="messages"></div>
+<input id="messageInput" placeholder="Write a message...">
+<button onclick="sendMessage()">Send Message ➤</button>
+</div>
+</div>
+</main>
+
+<script>
+const SUPABASE_URL =
+"https://lskiiwpqyicgeetjwyrw.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_jbvuRcbR6Z5ocrRRUuoiIQ_wWVVF88b";
+
+const client = window.supabase.createClient(
+SUPABASE_URL, SUPABASE_KEY
+);
+
+let currentUser = null;
+let selectedUser = null;
+let channel = null;
+
+function show(id) {
+["auth","pending","app"].forEach(x =>
+document.getElementById(x).style.display =
+x === id ? "block" : "none"
+);
+}
+
+function status(message) {
+document.getElementById("status").textContent = message;
+}
+
+async function register() {
+const name = document.getElementById("name").value.trim();
+const email = document.getElementById("email").value.trim();
+const password = document.getElementById("password").value;
+
+if(!name || !email || password.length < 6)
+return status("Enter your name, email and a password of at least 6 characters.");
+
+status("Creating account...");
+
+const {data,error} = await client.auth.signUp({
+email,password,
+options:{data:{display_name:name}}
+});
+
+if(error) return status(error.message);
+
+if(data.session) {
+await start();
+} else {
+status("Account created! Check your email if confirmation is required, then log in.");
+}
+}
+
+async function login() {
+status("Logging in...");
+
+const {error} = await client.auth.signInWithPassword({
+email:document.getElementById("loginEmail").value.trim(),
+password:document.getElementById("loginPassword").value
+});
+
+if(error) return status(error.message);
+
+await start();
+}
+
+async function start() {
+const {data:{user},error} = await client.auth.getUser();
+if(error || !user) return show("auth");
+
+currentUser = user;
+
+const {data:profile,error:profileError} = await client
+.from("profiles")
+.select("*")
+.eq("id",user.id)
+.single();
+
+if(profileError) {
+status("Profile error: "+profileError.message);
+return show("auth");
+}
+
+if(!profile.approved) {
+show("pending");
+return;
+}
+
+document.getElementById("welcome").textContent =
+"Welcome, "+profile.display_name;
+
+show("app");
+await loadUsers();
+subscribeMessages();
+}
+
+async function checkApproval() {
+await start();
+}
+
+async function loadUsers() {
+const {data,error} = await client
+.from("profiles")
+.select("id,display_name")
+.eq("approved",true)
+.neq("id",currentUser.id)
+.order("display_name");
+
+const container = document.getElementById("users");
+
+if(error) {
+container.textContent = error.message;
+return;
+}
+
+container.innerHTML = "";
+
+if(!data.length) {
+container.textContent = "No other approved members yet.";
+return;
+}
+
+data.forEach(person => {
+const button = document.createElement("button");
+button.className = "user";
+button.textContent = person.display_name;
+button.onclick = () => openChat(person);
+container.appendChild(button);
+});
+}
+
+async function openChat(person) {
+selectedUser = person;
+document.getElementById("chatTitle").textContent =
+"Chat with "+person.display_name;
+document.getElementById("chatArea").style.display = "block";
+await loadMessages();
+}
+
+async function loadMessages() {
+if(!selectedUser) return;
+
+const {data,error} = await client
+.from("messages")
+.select("*")
+.or(
+"and(sender_id.eq."+currentUser.id+
+",receiver_id.eq."+selectedUser.id+
+"),and(sender_id.eq."+selectedUser.id+
+",receiver_id.eq."+currentUser.id+")"
+)
+.order("created_at",{ascending:true});
+
+if(error) {
+document.getElementById("messages").textContent = error.message;
+return;
+}
+
+const box = document.getElementById("messages");
+box.innerHTML = "";
+
+data.forEach(m => {
+const div = document.createElement("div");
+div.className = "msg "+(m.sender_id === currentUser.id ? "mine" : "");
+div.textContent = m.content;
+box.appendChild(div);
+});
+
+box.scrollTop = box.scrollHeight;
+}
+
+async function sendMessage() {
+const input = document.getElementById("messageInput");
+const content = input.value.trim();
+
+if(!content || !selectedUser) return;
+
+const {error} = await client.from("messages").insert({
+sender_id:currentUser.id,
+receiver_id:selectedUser.id,
+content:content
+});
+
+if(error) {
+alert("Message error: "+error.message);
+return;
+}
+
+input.value = "";
+await loadMessages();
+}
+
+function subscribeMessages() {
+if(channel) client.removeChannel(channel);
+
+channel = client.channel("argon-live-chat")
+.on("postgres_changes",{
+event:"*",
+schema:"public",
+table:"messages"
+},() => {
+if(selectedUser) loadMessages();
+})
+.subscribe();
+}
+
+async function logout() {
+if(channel) await client.removeChannel(channel);
+channel = null;
+selectedUser = null;
+currentUser = null;
+await client.auth.signOut();
+show("auth");
+}
+
+client.auth.onAuthStateChange((event,session) => {
+if(event === "SIGNED_IN" && session) {
+setTimeout(start,100);
+}
+});
+
+(async function init(){
+const {data:{session}} = await client.auth.getSession();
+if(session) await start();
+else show("auth");
+})();
+</script>
+</body>
+</html>
