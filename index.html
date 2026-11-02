@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,96 +8,331 @@
 <style>
 :root{
  --bg:#f5f4ef;--panel:#fffefa;--line:#e8e5dc;
- --green:#315b46;--green2:#e6eee6;
+ --green:#315b46;--green2:#e6eee6;--green-bright:#22c55e;
  --ink:#202a23;--muted:#898e84;--red:#a84444;
+ --shadow:0 12px 34px rgba(32,42,35,0.07);
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif}
+
+/* KEYFRAME ANIMATIONS */
+@keyframes bgFloat{
+ 0%,100%{transform:translate(0,0) scale(1)}
+ 50%{transform:translate(35px,-25px) scale(1.08)}
+}
+@keyframes starSpin{
+ 0%,100%{transform:rotate(0deg) scale(1)}
+ 50%{transform:rotate(18deg) scale(1.15)}
+}
+@keyframes screenEnter{
+ 0%{opacity:0;transform:translateY(18px) scale(0.98)}
+ 100%{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes memberSlideIn{
+ 0%{opacity:0;transform:translateX(-16px)}
+ 100%{opacity:1;transform:translateX(0)}
+}
+@keyframes bubbleLeft{
+ 0%{opacity:0;transform:translateX(-14px) translateY(8px) scale(0.94)}
+ 100%{opacity:1;transform:translateX(0) translateY(0) scale(1)}
+}
+@keyframes bubbleRight{
+ 0%{opacity:0;transform:translateX(14px) translateY(8px) scale(0.94)}
+ 100%{opacity:1;transform:translateX(0) translateY(0) scale(1)}
+}
+@keyframes sysPop{
+ 0%{opacity:0;transform:scale(0.85)}
+ 100%{opacity:1;transform:scale(1)}
+}
+@keyframes onlineBreath{
+ 0%,100%{box-shadow:0 0 0 2px rgba(34,197,94,0.3);transform:scale(1)}
+ 50%{box-shadow:0 0 0 6px rgba(34,197,94,0.05);transform:scale(1.12)}
+}
+@keyframes sonarPulse{
+ 0%{box-shadow:0 0 0 0 rgba(49,91,70,0.45),0 0 0 0 rgba(49,91,70,0.25)}
+ 70%{box-shadow:0 0 0 18px rgba(49,91,70,0),0 0 0 34px rgba(49,91,70,0)}
+ 100%{box-shadow:0 0 0 0 rgba(49,91,70,0),0 0 0 0 rgba(49,91,70,0)}
+}
+@keyframes phoneShake{
+ 0%,100%{transform:rotate(0)}
+ 20%{transform:rotate(-12deg) scale(1.05)}
+ 40%{transform:rotate(12deg) scale(1.05)}
+ 60%{transform:rotate(-8deg)}
+ 80%{transform:rotate(8deg)}
+}
+@keyframes modalPop{
+ 0%{opacity:0;transform:translateY(24px) scale(0.9)}
+ 100%{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes dotBounce{
+ 0%,80%,100%{transform:translateY(0);opacity:0.4}
+ 40%{transform:translateY(-4px);opacity:1}
+}
+@keyframes spinIcon{
+ 0%{transform:rotate(0deg)}
+ 100%{transform:rotate(360deg)}
+}
+
+body{
+ margin:0;background:var(--bg);color:var(--ink);
+ font-family:Arial,sans-serif;-webkit-font-smoothing:antialiased;
+ overflow-x:hidden;position:relative
+}
+/* Ambient Floating Background Orbs */
+body::before,body::after{
+ content:"";position:fixed;border-radius:50%;filter:blur(75px);
+ z-index:-1;pointer-events:none;animation:bgFloat 14s infinite ease-in-out
+}
+body::before{
+ width:380px;height:380px;background:rgba(49,91,70,0.08);
+ top:-80px;left:-80px
+}
+body::after{
+ width:420px;height:420px;background:rgba(154,170,131,0.12);
+ bottom:-100px;right:-80px;animation-delay:-7s
+}
+
 button,input{font:inherit}
-button{border:0;border-radius:9px;padding:12px 15px;cursor:pointer;font-weight:700}
+button{
+ border:0;border-radius:9px;padding:11px 15px;cursor:pointer;
+ font-weight:700;position:relative;overflow:hidden;
+ transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s ease,background .2s ease;
+ display:inline-flex;align-items:center;justify-content:center;gap:6px
+}
+button:hover:not(:disabled){
+ transform:translateY(-2px);
+ box-shadow:0 6px 16px rgba(49,91,70,0.15)
+}
+button:active:not(:disabled){transform:translateY(0) scale(0.97)}
+button:disabled{opacity:.5;cursor:not-allowed}
+
+/* Subtle light sweep on buttons */
+button::after{
+ content:"";position:absolute;top:0;left:-100%;width:60%;height:100%;
+ background:linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent);
+ transition:left .5s ease
+}
+button:hover:not(:disabled)::after{left:130%}
+
 header{
  height:72px;padding:0 5%;display:flex;align-items:center;
- justify-content:space-between;background:var(--panel);
- border-bottom:1px solid var(--line)
+ justify-content:space-between;background:rgba(255,254,250,0.88);
+ backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
+ position:sticky;top:0;z-index:50;animation:screenEnter .5s ease out
 }
-.logo{font-size:24px;font-weight:900;letter-spacing:4px;color:var(--green)}
+.logo{font-size:24px;font-weight:900;letter-spacing:4px;color:var(--green);display:flex;align-items:center;gap:6px}
+.logo-star{display:inline-block;animation:starSpin 5s infinite ease-in-out}
 .logo span{color:#9aaa83}
+.header-right{display:flex;align-items:center;gap:14px}
 .tag{font-size:10px;letter-spacing:2px;color:var(--muted)}
-main{max-width:1250px;margin:30px auto;padding:0 16px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px}
+.my-badge{
+ display:flex;align-items:center;gap:8px;padding:6px 13px;
+ background:var(--bg);border:1px solid var(--line);border-radius:99px;
+ font-size:12px;font-weight:700;color:var(--green);
+ animation:sysPop .35s cubic-bezier(.34,1.56,.64,1)
+}
+
+main{max-width:1250px;margin:26px auto;padding:0 16px}
+.card{
+ background:var(--panel);border:1px solid var(--line);border-radius:16px;
+ padding:22px;box-shadow:var(--shadow);
+ animation:screenEnter .45s cubic-bezier(.16,1,.3,1) both;
+ transition:box-shadow .3s ease,border-color .3s ease
+}
+.card:hover{box-shadow:0 16px 42px rgba(32,42,35,0.09)}
+
 .auth{max-width:430px;margin:65px auto}
 h1{font:500 35px Georgia,serif;margin:12px 0}
-h2{font:500 23px Georgia,serif;margin:9px 0}
+h2{font:500 22px Georgia,serif;margin:6px 0}
 p{line-height:1.5}
-.muted{font-size:13px;color:var(--muted)}
-.eyebrow{font-size:10px;letter-spacing:2px;color:#66836c;font-weight:800}
+.muted{font-size:13px;color:var(--muted);margin:4px 0}
+.eyebrow{font-size:10px;letter-spacing:2px;color:#66836c;font-weight:800;text-transform:uppercase}
+
 input{
- width:100%;padding:14px;margin:7px 0;background:#faf9f5;
- border:1px solid var(--line);border-radius:9px;color:var(--ink);outline:none
+ width:100%;padding:13px 14px;margin:7px 0;background:#faf9f5;
+ border:1px solid var(--line);border-radius:9px;color:var(--ink);outline:none;
+ transition:all .25s cubic-bezier(.16,1,.3,1)
 }
-input:focus{border-color:var(--green)}
+input:focus{
+ border-color:var(--green);background:#fff;
+ box-shadow:0 0 0 4px rgba(49,91,70,0.1);transform:translateY(-1px)
+}
+
 .primary{background:var(--green);color:white}
 .secondary{background:#eeeee7;color:#35483a}
 .good{background:#dcebe0;color:#315b46}
 .bad{background:#f5e2df;color:var(--red)}
+.danger-solid{background:var(--red);color:white}
 .full{width:100%;margin-top:9px}
 .tabs{display:flex;gap:8px;margin:20px 0}
 .tabs button{flex:1}
 .hidden{display:none!important}
-.status{font-size:13px;color:var(--green);min-height:20px;margin-top:12px}
+.status{font-size:13px;color:var(--green);min-height:20px;margin-top:12px;transition:all .2s}
+
 #workspace{display:none}
-.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px}
-.sidebar{min-height:620px;display:flex;flex-direction:column}
-.sidehead{display:flex;align-items:center;justify-content:space-between}
-.members{overflow:auto;flex:1}
+.layout{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px}
+.sidebar{height:650px;display:flex;flex-direction:column}
+.sidehead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.refresh-btn:active{animation:spinIcon .4s ease}
+
+.online-pill{
+ display:inline-flex;align-items:center;gap:6px;font-size:11px;
+ background:var(--green2);color:var(--green);padding:4px 10px;
+ border-radius:99px;font-weight:700;margin-top:2px
+}
+.search-box{margin:6px 0 10px;padding:10px 12px;font-size:13px}
+.members{overflow-y:auto;flex:1;padding-right:4px;overflow-x:hidden}
+
 .person{
  display:flex;align-items:center;gap:12px;width:100%;
  text-align:left;background:transparent;color:var(--ink);
- margin:4px 0;padding:12px;border-radius:11px
+ margin:4px 0;padding:10px 12px;border-radius:12px;font-weight:600;
+ animation:memberSlideIn .35s cubic-bezier(.16,1,.3,1) both;
+ transition:background .2s ease,transform .22s cubic-bezier(.34,1.56,.64,1)
 }
-.person:hover,.person.active{background:var(--green2)}
+.person:hover{background:var(--green2);transform:translateX(5px)}
+.person.active{background:var(--green2);box-shadow:inset 3px 0 0 var(--green)}
+
+.avatar-wrap{position:relative;flex-shrink:0}
 .avatar{
  width:42px;height:42px;border-radius:50%;display:grid;
  place-items:center;background:#dce9dd;color:var(--green);
- font-weight:800;flex-shrink:0
+ font-weight:800;font-size:15px;transition:transform .25s ease
 }
-.person small{display:block;color:var(--muted);font-size:11px;margin-top:4px}
-.chat{min-height:620px;display:flex;flex-direction:column}
-.chathead{border-bottom:1px solid var(--line);padding-bottom:15px}
-.messages{flex:1;min-height:350px;max-height:470px;overflow:auto;padding:15px 4px}
+.person:hover .avatar{transform:scale(1.08) rotate(-4deg)}
+
+.dot{
+ position:absolute;bottom:1px;right:1px;width:11px;height:11px;
+ border-radius:50%;background:#c4c7be;border:2px solid var(--panel);
+ transition:background .3s ease
+}
+.dot.online{
+ background:var(--green-bright);
+ animation:onlineBreath 2.2s infinite ease-in-out
+}
+.person-info{flex:1;min-width:0}
+.person-name{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}
+.person small{display:block;color:var(--muted);font-size:11px;margin-top:3px;font-weight:400}
+.person small.online-txt{color:var(--green);font-weight:700}
+
+.chat{height:650px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.chathead{
+ border-bottom:1px solid var(--line);padding-bottom:14px;
+ display:flex;align-items:center;justify-content:space-between;gap:12px
+}
+.chathead-left{display:flex;align-items:center;gap:12px;min-width:0}
+.call-actions{display:flex;gap:8px}
+.icon-btn{
+ padding:10px 13px;border-radius:10px;font-size:13px;
+ background:var(--green2);color:var(--green)
+}
+
+/* Animated Typing Dots */
+.typing-wrap{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-weight:700}
+.typing-dots{display:inline-flex;gap:3px;align-items:center}
+.typing-dots span{
+ width:5px;height:5px;border-radius:50%;background:var(--green);
+ animation:dotBounce 1.2s infinite ease-in-out
+}
+.typing-dots span:nth-child(2){animation-delay:.15s}
+.typing-dots span:nth-child(3){animation-delay:.3s}
+
+.messages{
+ flex:1;overflow-y:auto;padding:16px 6px;
+ display:flex;flex-direction:column;scroll-behavior:smooth
+}
 .bubble{
- max-width:78%;width:fit-content;padding:11px 15px;margin:9px 0;
- background:#eeeee7;border-radius:5px 14px 14px 14px;overflow-wrap:anywhere
+ max-width:76%;width:fit-content;padding:11px 15px;margin:5px 0;
+ background:#eeeee7;border-radius:5px 14px 14px 14px;overflow-wrap:anywhere;
+ line-height:1.45;font-size:14px;
+ animation:bubbleLeft .28s cubic-bezier(.34,1.56,.64,1) both;
+ transition:transform .15s ease
 }
-.bubble.mine{margin-left:auto;background:var(--green);color:white;border-radius:14px 5px 14px 14px}
-.bubble time{display:block;font-size:10px;margin-top:6px;opacity:.7}
+.bubble:hover{transform:scale(1.01)}
+.bubble.mine{
+ margin-left:auto;background:var(--green);color:white;
+ border-radius:14px 5px 14px 14px;
+ animation:bubbleRight .28s cubic-bezier(.34,1.56,.64,1) both
+}
+.bubble.system-call{
+ margin:8px auto;background:#faf9f5;border:1px solid var(--line);
+ color:var(--muted);font-size:12px;border-radius:99px;padding:6px 14px;
+ animation:sysPop .3s cubic-bezier(.34,1.56,.64,1) both
+}
+.bubble time{display:block;font-size:10px;margin-top:5px;opacity:.7}
+
 .composer{display:flex;gap:9px;border-top:1px solid var(--line);padding-top:12px}
 .composer input{margin:0;min-width:0}
-.request{padding:14px;margin:9px 0;background:#f6f5ef;border:1px solid var(--line);border-radius:11px}
+
+.request{
+ padding:14px;margin:9px 0;background:#f6f5ef;
+ border:1px solid var(--line);border-radius:11px;
+ animation:screenEnter .35s ease both
+}
 .actions{display:flex;gap:8px;margin-top:10px}
 .actions button{flex:1}
 .admin{margin-bottom:16px}
-.empty{text-align:center;color:var(--muted);margin:auto;padding:25px}
-@media(max-width:700px){
+.empty{text-align:center;color:var(--muted);margin:auto;padding:25px;animation:screenEnter .4s ease}
+
+/* CALL OVERLAYS */
+.call-modal{
+ position:fixed;inset:0;background:rgba(20,28,23,0.82);backdrop-filter:blur(8px);
+ z-index:200;display:flex;align-items:center;justify-content:center;padding:16px
+}
+.call-card{
+ background:var(--panel);border:1px solid var(--line);border-radius:22px;
+ max-width:740px;width:100%;padding:24px;text-align:center;
+ box-shadow:0 24px 70px rgba(0,0,0,0.35);
+ animation:modalPop .35s cubic-bezier(.34,1.56,.64,1) both
+}
+.video-grid{
+ position:relative;background:#161e19;border-radius:14px;overflow:hidden;
+ height:380px;margin:16px 0;display:flex;align-items:center;justify-content:center
+}
+#remoteVideo{width:100%;height:100%;object-fit:cover}
+#localVideo{
+ position:absolute;bottom:14px;right:14px;width:135px;height:95px;
+ object-fit:cover;border-radius:10px;border:2px solid var(--panel);background:#253129;
+ box-shadow:0 8px 20px rgba(0,0,0,0.4);transition:transform .25s ease
+}
+#localVideo:hover{transform:scale(1.06)}
+.audio-avatar{
+ width:96px;height:96px;border-radius:50%;background:var(--green);color:#fff;
+ display:grid;place-items:center;font-size:36px;font-weight:800;margin:0 auto 12px;
+ animation:sonarPulse 2s infinite
+}
+.shake-ring{animation:sonarPulse 1.8s infinite, phoneShake 1.2s infinite ease-in-out}
+.call-controls{display:flex;justify-content:center;gap:12px;margin-top:14px;flex-wrap:wrap}
+.call-timer{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+@media(max-width:750px){
  header{padding:0 15px}.tag{display:none}
- main{margin:14px auto;padding:0 9px}
+ main{margin:12px auto;padding:0 9px}
  .layout{grid-template-columns:1fr}
- .sidebar{min-height:220px;max-height:280px}
- .chat{min-height:520px}
- .messages{min-height:300px}
+ .sidebar{height:280px}
+ .chat{height:540px}
  .card{padding:15px}
  .auth{margin:35px auto}
  h1{font-size:30px}
+ .video-grid{height:280px}
+ #localVideo{width:95px;height:72px}
 }
 </style>
 </head>
 <body>
+
 <header>
- <div class="logo">✦ ARGON<span>.</span></div>
- <div class="tag">PRIVATE COMMUNICATION NETWORK</div>
+ <div class="logo"><span class="logo-star">✦</span> ARGON<span>.</span></div>
+ <div class="header-right">
+  <div class="tag">PRIVATE COMMUNICATION NETWORK</div>
+  <div id="myBadge" class="my-badge hidden">
+   <span class="dot online" style="position:static;border:0"></span>
+   <span id="myBadgeName">Member</span>
+  </div>
+ </div>
 </header>
 
 <main>
+<!-- AUTH SCREEN -->
 <section id="auth" class="card auth">
  <div class="eyebrow">A PRIVATE MEMBERS NETWORK</div>
  <h1>Welcome to Argon.</h1>
@@ -121,6 +355,7 @@ input:focus{border-color:var(--green)}
  <div id="authStatus" class="status"></div>
 </section>
 
+<!-- PENDING SCREEN -->
 <section id="pending" class="card auth hidden">
  <div class="eyebrow">MEMBERSHIP REVIEW</div>
  <h1>Request received.</h1>
@@ -129,6 +364,7 @@ input:focus{border-color:var(--green)}
  <button class="secondary full" onclick="logout()">Logout</button>
 </section>
 
+<!-- REJECTED SCREEN -->
 <section id="rejected" class="card auth hidden">
  <div class="eyebrow">MEMBERSHIP REVIEW</div>
  <h1>Membership not approved.</h1>
@@ -136,6 +372,7 @@ input:focus{border-color:var(--green)}
  <button class="secondary full" onclick="logout()">Logout</button>
 </section>
 
+<!-- WORKSPACE -->
 <section id="workspace">
  <section id="adminPanel" class="card admin hidden">
   <div class="eyebrow">ADMIN CONTROL CENTRE</div>
@@ -148,24 +385,46 @@ input:focus{border-color:var(--green)}
  <div class="layout">
   <aside class="card sidebar">
    <div class="sidehead">
-    <div><div class="eyebrow">YOUR NETWORK</div><h2>Messages</h2></div>
-    <button class="secondary" onclick="loadUsers()">↻</button>
+    <div>
+     <div class="eyebrow">YOUR NETWORK</div>
+     <h2>Members</h2>
+     <div class="online-pill">
+      <span class="dot online" style="position:static;width:8px;height:8px;border:0"></span>
+      <span id="onlineCount">0</span> online now
+     </div>
+    </div>
+    <button class="secondary refresh-btn" onclick="loadUsers()" title="Refresh list">↻</button>
    </div>
+   <input id="memberSearch" class="search-box" placeholder="Search members..." oninput="renderUsers()">
    <div id="users" class="members">Loading members...</div>
    <button class="secondary full" onclick="logout()">Sign out</button>
   </aside>
 
   <section class="card chat">
    <div class="chathead">
-    <div class="eyebrow">PRIVATE CONVERSATION</div>
-    <h2 id="chatTitle">Select a conversation</h2>
-    <p id="chatSubtitle" class="muted">Choose a member to start chatting.</p>
+    <div class="chathead-left">
+     <div id="chatAvatarWrap" class="avatar-wrap hidden">
+      <div id="chatAvatar" class="avatar">?</div>
+      <span id="chatDot" class="dot"></span>
+     </div>
+     <div>
+      <div class="eyebrow">PRIVATE CONVERSATION</div>
+      <h2 id="chatTitle">Select a conversation</h2>
+      <p id="chatSubtitle" class="muted">Choose a member to start chatting.</p>
+     </div>
+    </div>
+    <div id="callButtons" class="call-actions hidden">
+     <button class="icon-btn" onclick="startCall('audio')" title="Voice Call">📞 Audio</button>
+     <button class="icon-btn" onclick="startCall('video')" title="Video Call">🎥 Video</button>
+    </div>
    </div>
+
    <div id="messages" class="messages">
-    <div class="empty"><h2>Your conversations</h2><p class="muted">Select a member to begin.</p></div>
+    <div class="empty"><h2>Your conversations</h2><p class="muted">Select a member to begin chatting or calling.</p></div>
    </div>
+
    <div class="composer">
-    <input id="messageInput" placeholder="Write a message..." disabled>
+    <input id="messageInput" placeholder="Write a message..." disabled oninput="notifyTyping()">
     <button id="sendBtn" class="primary" disabled onclick="sendMessage()">Send ↑</button>
    </div>
   </section>
@@ -173,13 +432,64 @@ input:focus{border-color:var(--green)}
 </section>
 </main>
 
+<!-- INCOMING CALL MODAL -->
+<div id="incomingModal" class="call-modal hidden">
+ <div class="call-card" style="max-width:380px">
+  <div class="eyebrow">INCOMING CALL</div>
+  <div id="incomingAvatar" class="audio-avatar shake-ring" style="margin-top:18px">?</div>
+  <h2 id="incomingName">Member</h2>
+  <p id="incomingType" class="muted">Incoming voice call...</p>
+  <div class="call-controls">
+   <button class="good" onclick="acceptCall()">✓ Accept</button>
+   <button class="danger-solid" onclick="rejectCall()">✕ Decline</button>
+  </div>
+ </div>
+</div>
+
+<!-- ACTIVE CALL MODAL -->
+<div id="activeCallModal" class="call-modal hidden">
+ <div class="call-card">
+  <div class="eyebrow" id="activeCallLabel">PRIVATE CALL</div>
+  <h2 id="activeCallName">Connecting...</h2>
+  <div id="callTimer" class="call-timer">00:00</div>
+
+  <div class="video-grid">
+   <video id="remoteVideo" autoplay playsinline></video>
+   <div id="audioPlaceholder" class="hidden" style="position:absolute;text-align:center;color:#fff">
+    <div id="activeAudioAvatar" class="audio-avatar">?</div>
+    <p class="muted" style="color:#cfd6d0">Voice Connected</p>
+   </div>
+   <video id="localVideo" autoplay playsinline muted></video>
+  </div>
+
+  <div class="call-controls">
+   <button id="muteBtn" class="secondary" onclick="toggleMute()">🎤 Mute</button>
+   <button id="camBtn" class="secondary" onclick="toggleCamera()">📷 Camera</button>
+   <button class="danger-solid" onclick="endCall(true)">End Call ✕</button>
+  </div>
+ </div>
+</div>
+
 <script>
 const SUPABASE_URL="https://lskiiwpqyicgeetjwyrw.supabase.co";
 const SUPABASE_KEY="sb_publishable_jbvuRcbR6Z5ocrRRUuoiIQ_wWVVF88b";
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-let currentUser=null,currentProfile=null,selectedUser=null,messageChannel=null;
-let starting=false;
+let currentUser=null,currentProfile=null,selectedUser=null;
+let messageChannel=null,networkChannel=null;
+let allMembers=[],onlineUsers=new Set();
+let starting=false,typingTimeout=null,lastTypedSent=0,lastRenderedMsgCount=0;
+
+// WebRTC State
+let peerConnection=null,localStream=null;
+let currentCallPeer=null,incomingOffer=null,currentCallType="audio";
+let isMuted=false,isCamOff=false,callTimerInt=null,callSeconds=0;
+let ringtoneCtx=null,ringtoneInt=null;
+
+const RTC_CONFIG={iceServers:[
+ {urls:"stun:stun.l.google.com:19302"},
+ {urls:"stun:stun1.l.google.com:19302"}
+]};
 
 const $=id=>document.getElementById(id);
 function status(t){$("authStatus").textContent=t}
@@ -189,6 +499,7 @@ function screen(name){
   $(id).classList.toggle("hidden",id!==name);
   if(id==="workspace")$(id).style.display=id===name?"block":"none";
  });
+ $("myBadge").classList.toggle("hidden",name!=="workspace");
 }
 
 function switchTab(tab){
@@ -218,229 +529,4 @@ async function register(){
 async function login(){
  const email=$("loginEmail").value.trim();
  const password=$("loginPassword").value;
- if(!email||!password)return status("Enter your email and password.");
-
- status("Signing in...");
- const {error}=await db.auth.signInWithPassword({email,password});
- if(error)return status(error.message);
- await start();
-}
-
-async function start(){
- if(starting)return;
- starting=true;
- try{
-  const {data:{user},error}=await db.auth.getUser();
-  if(error||!user){screen("auth");return}
-  currentUser=user;
-
-  const {data:p,error:e}=await db.from("profiles")
-   .select("id,email,display_name,approved,rejected,is_admin")
-   .eq("id",user.id).single();
-
-  if(e){
-   screen("auth");
-   status("Profile error: "+e.message);
-   return;
-  }
-
-  currentProfile=p;
-  if(p.rejected){screen("rejected");return}
-  if(!p.approved){screen("pending");return}
-
-  screen("workspace");
-  $("adminPanel").classList.toggle("hidden",!p.is_admin);
-
-  if(p.is_admin)await loadRequests();
-  await loadUsers();
-  subscribeMessages();
- }finally{starting=false}
-}
-
-async function checkApproval(){await start()}
-
-async function loadRequests(){
- if(!currentProfile?.is_admin)return;
- const box=$("requests");
- box.textContent="Loading requests...";
-
- const {data,error}=await db.from("profiles")
-  .select("id,email,display_name,created_at")
-  .eq("approved",false).eq("rejected",false)
-  .order("created_at",{ascending:true});
-
- if(error){box.textContent="Request error: "+error.message;return}
- box.innerHTML="";
- if(!data.length){box.textContent="No pending requests.";return}
-
- data.forEach(person=>{
-  const card=document.createElement("div");
-  card.className="request";
-  const name=document.createElement("strong");
-  name.textContent=person.display_name||"Member";
-  const email=document.createElement("p");
-  email.className="muted";
-  email.textContent=person.email||"";
-  const actions=document.createElement("div");
-  actions.className="actions";
-
-  const yes=document.createElement("button");
-  yes.className="good";yes.textContent="Approve";
-  yes.onclick=()=>updateMember(person.id,{approved:true,rejected:false});
-
-  const no=document.createElement("button");
-  no.className="bad";no.textContent="Reject";
-  no.onclick=()=>updateMember(person.id,{approved:false,rejected:true});
-
-  actions.append(yes,no);
-  card.append(name,email,actions);
-  box.appendChild(card);
- });
-}
-
-async function updateMember(id,changes){
- const {error}=await db.from("profiles").update(changes).eq("id",id);
- if(error){alert("Membership update failed: "+error.message);return}
- await loadRequests();
- await loadUsers();
-}
-
-async function loadUsers(){
- if(!currentUser)return;
- const box=$("users");
- box.textContent="Loading members...";
-
- const {data,error}=await db.from("profiles")
-  .select("id,display_name")
-  .eq("approved",true).eq("rejected",false)
-  .neq("id",currentUser.id).order("display_name");
-
- if(error){box.textContent="Member error: "+error.message;return}
- box.innerHTML="";
- if(!data.length){
-  box.textContent="No other approved members yet.";
-  return;
- }
-
- data.forEach(person=>{
-  const b=document.createElement("button");
-  b.className="person"+(selectedUser?.id===person.id?" active":"");
-
-  const avatar=document.createElement("span");
-  avatar.className="avatar";
-  avatar.textContent=(person.display_name||"?").slice(0,1).toUpperCase();
-
-  const label=document.createElement("span");
-  label.textContent=person.display_name||"Member";
-
-  const small=document.createElement("small");
-  small.textContent="Argon member";
-  label.appendChild(small);
-
-  b.append(avatar,label);
-  b.onclick=()=>openChat(person);
-  box.appendChild(b);
- });
-}
-
-async function openChat(person){
- selectedUser=person;
- $("chatTitle").textContent=person.display_name||"Conversation";
- $("chatSubtitle").textContent="Private conversation";
- $("messageInput").disabled=false;
- $("sendBtn").disabled=false;
- await loadUsers();
- await loadMessages();
-}
-
-async function loadMessages(){
- if(!selectedUser||!currentUser)return;
-
- const {data,error}=await db.from("messages").select("*")
-  .or("and(sender_id.eq."+currentUser.id+",receiver_id.eq."+selectedUser.id+"),and(sender_id.eq."+selectedUser.id+",receiver_id.eq."+currentUser.id+")")
-  .order("created_at",{ascending:true});
-
- const box=$("messages");
- if(error){box.textContent="Message error: "+error.message;return}
- box.innerHTML="";
-
- if(!data.length){
-  box.innerHTML='<div class="empty"><h2>Start the conversation</h2><p class="muted">Send the first message.</p></div>';
-  return;
- }
-
- data.forEach(m=>{
-  const bubble=document.createElement("div");
-  bubble.className="bubble"+(m.sender_id===currentUser.id?" mine":"");
-
-  const content=document.createElement("div");
-  content.textContent=m.content;
-
-  const time=document.createElement("time");
-  time.textContent=new Date(m.created_at).toLocaleString();
-
-  bubble.append(content,time);
-  box.appendChild(bubble);
- });
- box.scrollTop=box.scrollHeight;
-}
-
-async function sendMessage(){
- const input=$("messageInput");
- const content=input.value.trim();
- if(!content||!selectedUser)return;
-
- $("sendBtn").disabled=true;
- const {error}=await db.from("messages").insert({
-  sender_id:currentUser.id,
-  receiver_id:selectedUser.id,
-  content
- });
- $("sendBtn").disabled=false;
-
- if(error){alert("Message error: "+error.message);return}
- input.value="";
- await loadMessages();
-}
-
-function subscribeMessages(){
- if(messageChannel)db.removeChannel(messageChannel);
- messageChannel=db.channel("argon-live-"+currentUser.id)
-  .on("postgres_changes",{event:"*",schema:"public",table:"messages"},()=>{
-   if(selectedUser)loadMessages();
-  }).subscribe();
-}
-
-async function logout(){
- if(messageChannel)await db.removeChannel(messageChannel);
- messageChannel=null;
- selectedUser=null;
- currentUser=null;
- currentProfile=null;
- $("messageInput").disabled=true;
- $("sendBtn").disabled=true;
- await db.auth.signOut();
- screen("auth");
- switchTab("login");
-}
-
-$("messageInput").addEventListener("keydown",e=>{
- if(e.key==="Enter")sendMessage();
-});
-
-db.auth.onAuthStateChange((event)=>{
- if(event==="SIGNED_OUT"){
-  currentUser=null;
-  currentProfile=null;
-  screen("auth");
- }
-});
-
-(async()=>{
- const {data:{session}}=await db.auth.getSession();
- if(session)await start();
- else screen("auth");
-})();
-</script>
-</body>
-</html>
+ if(!email||!password)return status("Enter you
