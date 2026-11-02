@@ -3,303 +3,443 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Argon Chat</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ARGON — Private Network</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
+:root{
+ --bg:#f5f4ef;--panel:#fffefa;--line:#e8e5dc;
+ --green:#315b46;--green2:#e6eee6;
+ --ink:#202a23;--muted:#898e84;--red:#a84444;
+}
 *{box-sizing:border-box}
-body{margin:0;background:#0b1020;color:#fff;font-family:Arial,sans-serif}
-header{padding:20px;background:#151e32;font-size:23px;font-weight:bold;color:#61d5ff}
-main{max-width:850px;margin:25px auto;padding:15px}
-.panel{background:#151e32;padding:22px;border-radius:15px;margin-bottom:15px}
-input,button{width:100%;padding:14px;margin:7px 0;border:0;border-radius:9px;font-size:15px}
-input{background:#253149;color:white}
-button{background:#168bd0;color:white;font-weight:bold;cursor:pointer}
-.secondary{background:#34435e}
-#app{display:none}
-#chatArea{display:none}
-#users{display:flex;flex-wrap:wrap;gap:8px}
-.user{width:auto;background:#293b56}
-#messages{height:350px;overflow:auto;background:#0b1020;padding:12px;border-radius:10px}
-.msg{background:#253d59;padding:10px;border-radius:10px;margin:8px 0;max-width:85%;overflow-wrap:anywhere}
-.mine{background:#126da3;margin-left:auto}
-small{color:#a8b5ca}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif}
+button,input{font:inherit}
+button{border:0;border-radius:9px;padding:12px 15px;cursor:pointer;font-weight:700}
+header{
+ height:72px;padding:0 5%;display:flex;align-items:center;
+ justify-content:space-between;background:var(--panel);
+ border-bottom:1px solid var(--line)
+}
+.logo{font-size:24px;font-weight:900;letter-spacing:4px;color:var(--green)}
+.logo span{color:#9aaa83}
+.tag{font-size:10px;letter-spacing:2px;color:var(--muted)}
+main{max-width:1250px;margin:30px auto;padding:0 16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px}
+.auth{max-width:430px;margin:65px auto}
+h1{font:500 35px Georgia,serif;margin:12px 0}
+h2{font:500 23px Georgia,serif;margin:9px 0}
+p{line-height:1.5}
+.muted{font-size:13px;color:var(--muted)}
+.eyebrow{font-size:10px;letter-spacing:2px;color:#66836c;font-weight:800}
+input{
+ width:100%;padding:14px;margin:7px 0;background:#faf9f5;
+ border:1px solid var(--line);border-radius:9px;color:var(--ink);outline:none
+}
+input:focus{border-color:var(--green)}
+.primary{background:var(--green);color:white}
+.secondary{background:#eeeee7;color:#35483a}
+.good{background:#dcebe0;color:#315b46}
+.bad{background:#f5e2df;color:var(--red)}
+.full{width:100%;margin-top:9px}
+.tabs{display:flex;gap:8px;margin:20px 0}
+.tabs button{flex:1}
+.hidden{display:none!important}
+.status{font-size:13px;color:var(--green);min-height:20px;margin-top:12px}
+#workspace{display:none}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px}
+.sidebar{min-height:620px;display:flex;flex-direction:column}
+.sidehead{display:flex;align-items:center;justify-content:space-between}
+.members{overflow:auto;flex:1}
+.person{
+ display:flex;align-items:center;gap:12px;width:100%;
+ text-align:left;background:transparent;color:var(--ink);
+ margin:4px 0;padding:12px;border-radius:11px
+}
+.person:hover,.person.active{background:var(--green2)}
+.avatar{
+ width:42px;height:42px;border-radius:50%;display:grid;
+ place-items:center;background:#dce9dd;color:var(--green);
+ font-weight:800;flex-shrink:0
+}
+.person small{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+.chat{min-height:620px;display:flex;flex-direction:column}
+.chathead{border-bottom:1px solid var(--line);padding-bottom:15px}
+.messages{flex:1;min-height:350px;max-height:470px;overflow:auto;padding:15px 4px}
+.bubble{
+ max-width:78%;width:fit-content;padding:11px 15px;margin:9px 0;
+ background:#eeeee7;border-radius:5px 14px 14px 14px;overflow-wrap:anywhere
+}
+.bubble.mine{margin-left:auto;background:var(--green);color:white;border-radius:14px 5px 14px 14px}
+.bubble time{display:block;font-size:10px;margin-top:6px;opacity:.7}
+.composer{display:flex;gap:9px;border-top:1px solid var(--line);padding-top:12px}
+.composer input{margin:0;min-width:0}
+.request{padding:14px;margin:9px 0;background:#f6f5ef;border:1px solid var(--line);border-radius:11px}
+.actions{display:flex;gap:8px;margin-top:10px}
+.actions button{flex:1}
+.admin{margin-bottom:16px}
+.empty{text-align:center;color:var(--muted);margin:auto;padding:25px}
+@media(max-width:700px){
+ header{padding:0 15px}.tag{display:none}
+ main{margin:14px auto;padding:0 9px}
+ .layout{grid-template-columns:1fr}
+ .sidebar{min-height:220px;max-height:280px}
+ .chat{min-height:520px}
+ .messages{min-height:300px}
+ .card{padding:15px}
+ .auth{margin:35px auto}
+ h1{font-size:30px}
+}
 </style>
 </head>
 <body>
-
-<header>✦ ARGON CHAT</header>
+<header>
+ <div class="logo">✦ ARGON<span>.</span></div>
+ <div class="tag">PRIVATE COMMUNICATION NETWORK</div>
+</header>
 
 <main>
-<div id="auth" class="panel">
-<h2>Welcome to Argon Chat</h2>
-<p>Private messaging. Approved members only.</p>
+<section id="auth" class="card auth">
+ <div class="eyebrow">A PRIVATE MEMBERS NETWORK</div>
+ <h1>Welcome to Argon.</h1>
+ <p class="muted">Your conversations. Your people. Your space.</p>
+ <div class="tabs">
+  <button id="loginTab" class="primary" onclick="switchTab('login')">Login</button>
+  <button id="registerTab" class="secondary" onclick="switchTab('register')">Register</button>
+ </div>
+ <div id="loginForm">
+  <input id="loginEmail" type="email" placeholder="Email address">
+  <input id="loginPassword" type="password" placeholder="Password">
+  <button class="primary full" onclick="login()">Enter Argon →</button>
+ </div>
+ <div id="registerForm" class="hidden">
+  <input id="regName" placeholder="Display name">
+  <input id="regEmail" type="email" placeholder="Email address">
+  <input id="regPassword" type="password" placeholder="Password (minimum 6 characters)">
+  <button class="primary full" onclick="register()">Request membership →</button>
+ </div>
+ <div id="authStatus" class="status"></div>
+</section>
 
-<div id="register">
-<h3>Create account</h3>
-<input id="name" placeholder="Your display name">
-<input id="email" type="email" placeholder="Email address">
-<input id="password" type="password" placeholder="Password (minimum 6 characters)">
-<button onclick="register()">Create account</button>
-</div>
+<section id="pending" class="card auth hidden">
+ <div class="eyebrow">MEMBERSHIP REVIEW</div>
+ <h1>Request received.</h1>
+ <p class="muted">Your account is waiting for administrator approval.</p>
+ <button class="primary full" onclick="checkApproval()">Check approval status</button>
+ <button class="secondary full" onclick="logout()">Logout</button>
+</section>
 
-<hr>
-<h3>Already a member? Login</h3>
-<input id="loginEmail" type="email" placeholder="Email address">
-<input id="loginPassword" type="password" placeholder="Password">
-<button onclick="login()">Login</button>
-<p id="status"></p>
-</div>
+<section id="rejected" class="card auth hidden">
+ <div class="eyebrow">MEMBERSHIP REVIEW</div>
+ <h1>Membership not approved.</h1>
+ <p class="muted">Your membership request was not approved. Contact the administrator if you believe this is a mistake.</p>
+ <button class="secondary full" onclick="logout()">Logout</button>
+</section>
 
-<div id="pending" class="panel" style="display:none">
-<h2>Approval Pending ⏳</h2>
-<p>Your account is registered. The administrator must approve your account before you can chat.</p>
-<button onclick="checkApproval()">Check Status Again</button>
-<button class="secondary" onclick="logout()">Logout</button>
-</div>
+<section id="workspace">
+ <section id="adminPanel" class="card admin hidden">
+  <div class="eyebrow">ADMIN CONTROL CENTRE</div>
+  <h2>Membership requests</h2>
+  <p class="muted">Review and manage access to Argon.</p>
+  <div id="requests">Loading requests...</div>
+  <button class="secondary full" onclick="loadRequests()">Refresh requests ↻</button>
+ </section>
 
-<div id="app">
-<div class="panel">
-<h3 id="welcome"></h3>
-<button class="secondary" onclick="logout()">Logout</button>
-</div>
+ <div class="layout">
+  <aside class="card sidebar">
+   <div class="sidehead">
+    <div><div class="eyebrow">YOUR NETWORK</div><h2>Messages</h2></div>
+    <button class="secondary" onclick="loadUsers()">↻</button>
+   </div>
+   <div id="users" class="members">Loading members...</div>
+   <button class="secondary full" onclick="logout()">Sign out</button>
+  </aside>
 
-<div class="panel">
-<h3>Members</h3>
-<div id="users">Loading members...</div>
-</div>
-
-<div id="chatArea" class="panel">
-<h3 id="chatTitle">Conversation</h3>
-<div id="messages"></div>
-<input id="messageInput" placeholder="Write a message...">
-<button onclick="sendMessage()">Send Message ➤</button>
-</div>
-</div>
+  <section class="card chat">
+   <div class="chathead">
+    <div class="eyebrow">PRIVATE CONVERSATION</div>
+    <h2 id="chatTitle">Select a conversation</h2>
+    <p id="chatSubtitle" class="muted">Choose a member to start chatting.</p>
+   </div>
+   <div id="messages" class="messages">
+    <div class="empty"><h2>Your conversations</h2><p class="muted">Select a member to begin.</p></div>
+   </div>
+   <div class="composer">
+    <input id="messageInput" placeholder="Write a message..." disabled>
+    <button id="sendBtn" class="primary" disabled onclick="sendMessage()">Send ↑</button>
+   </div>
+  </section>
+ </div>
+</section>
 </main>
 
 <script>
-const SUPABASE_URL =
-"https://lskiiwpqyicgeetjwyrw.supabase.co";
+const SUPABASE_URL="https://lskiiwpqyicgeetjwyrw.supabase.co";
+const SUPABASE_KEY="sb_publishable_jbvuRcbR6Z5ocrRRUuoiIQ_wWVVF88b";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-const SUPABASE_KEY =
-"sb_publishable_jbvuRcbR6Z5ocrRRUuoiIQ_wWVVF88b";
+let currentUser=null,currentProfile=null,selectedUser=null,messageChannel=null;
+let starting=false;
 
-const client = window.supabase.createClient(
-SUPABASE_URL, SUPABASE_KEY
-);
+const $=id=>document.getElementById(id);
+function status(t){$("authStatus").textContent=t}
 
-let currentUser = null;
-let selectedUser = null;
-let channel = null;
-
-function show(id) {
-["auth","pending","app"].forEach(x =>
-document.getElementById(x).style.display =
-x === id ? "block" : "none"
-);
+function screen(name){
+ ["auth","pending","rejected","workspace"].forEach(id=>{
+  $(id).classList.toggle("hidden",id!==name);
+  if(id==="workspace")$(id).style.display=id===name?"block":"none";
+ });
 }
 
-function status(message) {
-document.getElementById("status").textContent = message;
+function switchTab(tab){
+ $("loginForm").classList.toggle("hidden",tab!=="login");
+ $("registerForm").classList.toggle("hidden",tab!=="register");
+ $("loginTab").className=tab==="login"?"primary":"secondary";
+ $("registerTab").className=tab==="register"?"primary":"secondary";
+ status("");
 }
 
-async function register() {
-const name = document.getElementById("name").value.trim();
-const email = document.getElementById("email").value.trim();
-const password = document.getElementById("password").value;
+async function register(){
+ const name=$("regName").value.trim();
+ const email=$("regEmail").value.trim();
+ const password=$("regPassword").value;
+ if(!name||!email||password.length<6)
+  return status("Enter your name, email and a password of at least 6 characters.");
 
-if(!name || !email || password.length < 6)
-return status("Enter your name, email and a password of at least 6 characters.");
+ status("Creating account...");
+ const {data,error}=await db.auth.signUp({
+  email,password,options:{data:{display_name:name}}
+ });
+ if(error)return status(error.message);
+ if(data.session)await start();
+ else status("Account created. Confirm your email, then log in.");
+}
 
-status("Creating account...");
+async function login(){
+ const email=$("loginEmail").value.trim();
+ const password=$("loginPassword").value;
+ if(!email||!password)return status("Enter your email and password.");
 
-const {data,error} = await client.auth.signUp({
-email,password,
-options:{data:{display_name:name}}
+ status("Signing in...");
+ const {error}=await db.auth.signInWithPassword({email,password});
+ if(error)return status(error.message);
+ await start();
+}
+
+async function start(){
+ if(starting)return;
+ starting=true;
+ try{
+  const {data:{user},error}=await db.auth.getUser();
+  if(error||!user){screen("auth");return}
+  currentUser=user;
+
+  const {data:p,error:e}=await db.from("profiles")
+   .select("id,email,display_name,approved,rejected,is_admin")
+   .eq("id",user.id).single();
+
+  if(e){
+   screen("auth");
+   status("Profile error: "+e.message);
+   return;
+  }
+
+  currentProfile=p;
+  if(p.rejected){screen("rejected");return}
+  if(!p.approved){screen("pending");return}
+
+  screen("workspace");
+  $("adminPanel").classList.toggle("hidden",!p.is_admin);
+
+  if(p.is_admin)await loadRequests();
+  await loadUsers();
+  subscribeMessages();
+ }finally{starting=false}
+}
+
+async function checkApproval(){await start()}
+
+async function loadRequests(){
+ if(!currentProfile?.is_admin)return;
+ const box=$("requests");
+ box.textContent="Loading requests...";
+
+ const {data,error}=await db.from("profiles")
+  .select("id,email,display_name,created_at")
+  .eq("approved",false).eq("rejected",false)
+  .order("created_at",{ascending:true});
+
+ if(error){box.textContent="Request error: "+error.message;return}
+ box.innerHTML="";
+ if(!data.length){box.textContent="No pending requests.";return}
+
+ data.forEach(person=>{
+  const card=document.createElement("div");
+  card.className="request";
+  const name=document.createElement("strong");
+  name.textContent=person.display_name||"Member";
+  const email=document.createElement("p");
+  email.className="muted";
+  email.textContent=person.email||"";
+  const actions=document.createElement("div");
+  actions.className="actions";
+
+  const yes=document.createElement("button");
+  yes.className="good";yes.textContent="Approve";
+  yes.onclick=()=>updateMember(person.id,{approved:true,rejected:false});
+
+  const no=document.createElement("button");
+  no.className="bad";no.textContent="Reject";
+  no.onclick=()=>updateMember(person.id,{approved:false,rejected:true});
+
+  actions.append(yes,no);
+  card.append(name,email,actions);
+  box.appendChild(card);
+ });
+}
+
+async function updateMember(id,changes){
+ const {error}=await db.from("profiles").update(changes).eq("id",id);
+ if(error){alert("Membership update failed: "+error.message);return}
+ await loadRequests();
+ await loadUsers();
+}
+
+async function loadUsers(){
+ if(!currentUser)return;
+ const box=$("users");
+ box.textContent="Loading members...";
+
+ const {data,error}=await db.from("profiles")
+  .select("id,display_name")
+  .eq("approved",true).eq("rejected",false)
+  .neq("id",currentUser.id).order("display_name");
+
+ if(error){box.textContent="Member error: "+error.message;return}
+ box.innerHTML="";
+ if(!data.length){
+  box.textContent="No other approved members yet.";
+  return;
+ }
+
+ data.forEach(person=>{
+  const b=document.createElement("button");
+  b.className="person"+(selectedUser?.id===person.id?" active":"");
+
+  const avatar=document.createElement("span");
+  avatar.className="avatar";
+  avatar.textContent=(person.display_name||"?").slice(0,1).toUpperCase();
+
+  const label=document.createElement("span");
+  label.textContent=person.display_name||"Member";
+
+  const small=document.createElement("small");
+  small.textContent="Argon member";
+  label.appendChild(small);
+
+  b.append(avatar,label);
+  b.onclick=()=>openChat(person);
+  box.appendChild(b);
+ });
+}
+
+async function openChat(person){
+ selectedUser=person;
+ $("chatTitle").textContent=person.display_name||"Conversation";
+ $("chatSubtitle").textContent="Private conversation";
+ $("messageInput").disabled=false;
+ $("sendBtn").disabled=false;
+ await loadUsers();
+ await loadMessages();
+}
+
+async function loadMessages(){
+ if(!selectedUser||!currentUser)return;
+
+ const {data,error}=await db.from("messages").select("*")
+  .or("and(sender_id.eq."+currentUser.id+",receiver_id.eq."+selectedUser.id+"),and(sender_id.eq."+selectedUser.id+",receiver_id.eq."+currentUser.id+")")
+  .order("created_at",{ascending:true});
+
+ const box=$("messages");
+ if(error){box.textContent="Message error: "+error.message;return}
+ box.innerHTML="";
+
+ if(!data.length){
+  box.innerHTML='<div class="empty"><h2>Start the conversation</h2><p class="muted">Send the first message.</p></div>';
+  return;
+ }
+
+ data.forEach(m=>{
+  const bubble=document.createElement("div");
+  bubble.className="bubble"+(m.sender_id===currentUser.id?" mine":"");
+
+  const content=document.createElement("div");
+  content.textContent=m.content;
+
+  const time=document.createElement("time");
+  time.textContent=new Date(m.created_at).toLocaleString();
+
+  bubble.append(content,time);
+  box.appendChild(bubble);
+ });
+ box.scrollTop=box.scrollHeight;
+}
+
+async function sendMessage(){
+ const input=$("messageInput");
+ const content=input.value.trim();
+ if(!content||!selectedUser)return;
+
+ $("sendBtn").disabled=true;
+ const {error}=await db.from("messages").insert({
+  sender_id:currentUser.id,
+  receiver_id:selectedUser.id,
+  content
+ });
+ $("sendBtn").disabled=false;
+
+ if(error){alert("Message error: "+error.message);return}
+ input.value="";
+ await loadMessages();
+}
+
+function subscribeMessages(){
+ if(messageChannel)db.removeChannel(messageChannel);
+ messageChannel=db.channel("argon-live-"+currentUser.id)
+  .on("postgres_changes",{event:"*",schema:"public",table:"messages"},()=>{
+   if(selectedUser)loadMessages();
+  }).subscribe();
+}
+
+async function logout(){
+ if(messageChannel)await db.removeChannel(messageChannel);
+ messageChannel=null;
+ selectedUser=null;
+ currentUser=null;
+ currentProfile=null;
+ $("messageInput").disabled=true;
+ $("sendBtn").disabled=true;
+ await db.auth.signOut();
+ screen("auth");
+ switchTab("login");
+}
+
+$("messageInput").addEventListener("keydown",e=>{
+ if(e.key==="Enter")sendMessage();
 });
 
-if(error) return status(error.message);
-
-if(data.session) {
-await start();
-} else {
-status("Account created! Check your email if confirmation is required, then log in.");
-}
-}
-
-async function login() {
-status("Logging in...");
-
-const {error} = await client.auth.signInWithPassword({
-email:document.getElementById("loginEmail").value.trim(),
-password:document.getElementById("loginPassword").value
+db.auth.onAuthStateChange((event)=>{
+ if(event==="SIGNED_OUT"){
+  currentUser=null;
+  currentProfile=null;
+  screen("auth");
+ }
 });
 
-if(error) return status(error.message);
-
-await start();
-}
-
-async function start() {
-const {data:{user},error} = await client.auth.getUser();
-if(error || !user) return show("auth");
-
-currentUser = user;
-
-const {data:profile,error:profileError} = await client
-.from("profiles")
-.select("*")
-.eq("id",user.id)
-.single();
-
-if(profileError) {
-status("Profile error: "+profileError.message);
-return show("auth");
-}
-
-if(!profile.approved) {
-show("pending");
-return;
-}
-
-document.getElementById("welcome").textContent =
-"Welcome, "+profile.display_name;
-
-show("app");
-await loadUsers();
-subscribeMessages();
-}
-
-async function checkApproval() {
-await start();
-}
-
-async function loadUsers() {
-const {data,error} = await client
-.from("profiles")
-.select("id,display_name")
-.eq("approved",true)
-.neq("id",currentUser.id)
-.order("display_name");
-
-const container = document.getElementById("users");
-
-if(error) {
-container.textContent = error.message;
-return;
-}
-
-container.innerHTML = "";
-
-if(!data.length) {
-container.textContent = "No other approved members yet.";
-return;
-}
-
-data.forEach(person => {
-const button = document.createElement("button");
-button.className = "user";
-button.textContent = person.display_name;
-button.onclick = () => openChat(person);
-container.appendChild(button);
-});
-}
-
-async function openChat(person) {
-selectedUser = person;
-document.getElementById("chatTitle").textContent =
-"Chat with "+person.display_name;
-document.getElementById("chatArea").style.display = "block";
-await loadMessages();
-}
-
-async function loadMessages() {
-if(!selectedUser) return;
-
-const {data,error} = await client
-.from("messages")
-.select("*")
-.or(
-"and(sender_id.eq."+currentUser.id+
-",receiver_id.eq."+selectedUser.id+
-"),and(sender_id.eq."+selectedUser.id+
-",receiver_id.eq."+currentUser.id+")"
-)
-.order("created_at",{ascending:true});
-
-if(error) {
-document.getElementById("messages").textContent = error.message;
-return;
-}
-
-const box = document.getElementById("messages");
-box.innerHTML = "";
-
-data.forEach(m => {
-const div = document.createElement("div");
-div.className = "msg "+(m.sender_id === currentUser.id ? "mine" : "");
-div.textContent = m.content;
-box.appendChild(div);
-});
-
-box.scrollTop = box.scrollHeight;
-}
-
-async function sendMessage() {
-const input = document.getElementById("messageInput");
-const content = input.value.trim();
-
-if(!content || !selectedUser) return;
-
-const {error} = await client.from("messages").insert({
-sender_id:currentUser.id,
-receiver_id:selectedUser.id,
-content:content
-});
-
-if(error) {
-alert("Message error: "+error.message);
-return;
-}
-
-input.value = "";
-await loadMessages();
-}
-
-function subscribeMessages() {
-if(channel) client.removeChannel(channel);
-
-channel = client.channel("argon-live-chat")
-.on("postgres_changes",{
-event:"*",
-schema:"public",
-table:"messages"
-},() => {
-if(selectedUser) loadMessages();
-})
-.subscribe();
-}
-
-async function logout() {
-if(channel) await client.removeChannel(channel);
-channel = null;
-selectedUser = null;
-currentUser = null;
-await client.auth.signOut();
-show("auth");
-}
-
-client.auth.onAuthStateChange((event,session) => {
-if(event === "SIGNED_IN" && session) {
-setTimeout(start,100);
-}
-});
-
-(async function init(){
-const {data:{session}} = await client.auth.getSession();
-if(session) await start();
-else show("auth");
+(async()=>{
+ const {data:{session}}=await db.auth.getSession();
+ if(session)await start();
+ else screen("auth");
 })();
 </script>
 </body>
